@@ -1,0 +1,67 @@
+{% extends "reservation/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+
+    <button class="btn btn-dark m-2" id="search">Find Stay</button>
+    <button class="btn btn-dark m-2" id="rooms">All Rooms</button>
+    {% if user.is_authenticated %}
+        <button class="btn btn-dark m-2" id="my_reservations" aria-current="User">My Reservations</button>
+    {% endif %}
+
+        <div id="search-div" class="container text-center">
+            <h1 class="display-6 my-3">Search</h1>
+                <form id="search-form">
+                    {% csrf_token %}
+                    <div class="my-1">
+                        <label for="checkin" class="fs-5">Checkin</label> 
+                        
+                        <button class="change-date btn btn-dark m-2" id="chin-" type="button"><</button> 
+                        {{ search_form.checkin }} 
+                        <button class="change-date btn btn-dark m-2" id="chin" type="button">></button>
+                    </div>
+                    <div class="my-1">
+                        <label for="checkout" class="fs-5">Checkout</label>  
+                        <button class="change-date btn btn-dark m-2" id="chout-" type="button"><</button> 
+                        {{ search_form.checkout }} 
+                        <button class="change-date btn btn-dark m-2" id="chout" type="button">></button>
+                    </div>
+                    <div class="my-1">
+                        <label for="pers_num" class="fs-5">Number of Guests</label> 
+                        {{ search_form.pers_num }}
+                    </div>
+                    <div class="my-1">{{ search_form.req_room }}</div>
+                    <button class="my-1 btn btn-success" id="search-btn" type="button">Search</button>
+                </form>
+        </div>
+
+        <div id="results-div" class="container"></div>
+        <div id="room-div" class="container"></div>
+
+        <div id="rooms-div" class="container">
+            <h1 class="display-6 my-3">All Rooms</h1>
+            <div class="row row-cols-1 row-cols-lg-2 g-4">
+                {% for room in all_rooms %}
+                    <div class="col d-flex align-items-evenly justify-content-center" id="">
+                        <div class="card mb-3">
+                            <img src="{{ room.img.url }}" class="card-img-top" alt="...">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ room.title }}</h5>
+                                <p class="card-text">Price per night: ${{ room.price }}. Beds: {{ room.bed_num }}</p>
+                                <p class="card-text">{{ room.description }}</p>
+                                <p class="card-text"><small class="text-muted"><button id="select-{{ room.id }}" class="search-title my-1 btn btn-success">Search Available Dates</button></small></p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="my_reservations-div" class="container"></div>
+        <div id="select_res-div" class="container"></div>
+
+    <script src="{% static 'reservation/script.js' %}"></script>
+
+{% endblock %}
+
