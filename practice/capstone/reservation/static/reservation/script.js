@@ -1,20 +1,3 @@
-const changeDateClick = async (btn) => {
-    if (!document.querySelector('#checkout').value &&
-        !document.querySelector('#checkin').value && 
-        !document.querySelector('#pers_num').value)
-        {return}
-    let chin = document.querySelector('#checkin').value
-    let chout = document.querySelector('#checkout').value
-    await fetch(`change_date?btn=${btn.id}&chin=${chin}&chout=${chout}`)
-    .then(response => response.json())
-    .then(data => {
-        if (btn.id.slice(0, 4) === 'chin') {document.querySelector('#checkin').value = data['new_date']}
-        else if (btn.id.slice(0, 5) === 'chout') {document.querySelector('#checkout').value = data['new_date']}
-    })   
-    search()
-}
-
-
 document.addEventListener('DOMContentLoaded', function () {
     // Navigation
     document.querySelector('#search').addEventListener('click', () => {
@@ -31,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function () {
     })
     // By default show 'search'
     search()
-
     // Change dates with buttons and remove results if clicked
     document.querySelectorAll('.change-date').forEach(btn => {
         btn.addEventListener("click", () => {
@@ -42,7 +24,6 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('input, select').forEach(input => {
         input.onchange = search
     })
-
     // Search available dates for a selected room
     const roomsToSelect = document.querySelectorAll('.search-title')
     roomsToSelect.forEach(btn => {
@@ -54,6 +35,23 @@ document.addEventListener('DOMContentLoaded', function () {
 })
 
 // Helper functions
+
+const changeDateClick = async (btn) => {
+    if (!document.querySelector('#checkout').value &&
+        !document.querySelector('#checkin').value && 
+        !document.querySelector('#pers_num').value)
+        {return}
+    let chin = document.querySelector('#checkin').value
+    let chout = document.querySelector('#checkout').value
+    await fetch(`change_date?btn=${btn.id}&chin=${chin}&chout=${chout}`)
+    .then(response => response.json())
+    .then(data => {
+        if (btn.id.slice(0, 4) === 'chin') {document.querySelector('#checkin').value = data['new_date']}
+        else if (btn.id.slice(0, 5) === 'chout') {document.querySelector('#checkout').value = data['new_date']}
+    })   
+    search()
+}
+
 
 function create_room_div(room) {
     let room_div = document.createElement('div')
@@ -94,14 +92,14 @@ async function query_db() {
     await fetch(`search?chin=${chin}&chout=${chout}&pers_num=${pers_num}&req_room=${req_room}`)
     .then(response => response.json())
     .then(rooms => {
-        console.log(rooms)
-        if (rooms.length > 0) {
-            for (r of rooms) {
-                let room_div = create_room_div(r)
-                document.querySelector('#results-div').append(room_div)
-            }
+        if (rooms.length === undefined) {
+            title.innerHTML = 'No Rooms Available with Selected Parameters'
+            return
         }
-        else {title.innerHTML = 'No Rooms Available with Selected Parameters'}
+        for (r of rooms) {
+            let room_div = create_room_div(r)
+            document.querySelector('#results-div').append(room_div)
+        }
     })
     console.log('Results Updated')
 }
@@ -116,6 +114,7 @@ function search() {
     })
     remove_elements("#results-div > *, #room-div > *, #my_reservations-div > *, #select_res-div > *")
 }
+
 
 async function results() {
     document.querySelectorAll('#rooms-div, #my_reservations-div, #select_res-div, #room-div').forEach(div => {
@@ -206,7 +205,6 @@ async function my_reservations() {
         title.classList.add('display-6', 'my-3')
         document.querySelector('#my_reservations-div').prepend(title)
         for (res of reservations) {
-
             let res_div = document.createElement('div')
             res_div.classList.add('res-item','rounded', 'border', 'border-secondary', 'my-5', 'border-opacity-25')
             res_div.innerHTML = `<img class="img-fluid rounded-top" src="media/${res.room_img}"><br>
