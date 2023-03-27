@@ -67,31 +67,15 @@ function create_room_div(room) {
     return room_div
 }
 
-function remove_results() {
-    let elements = document.querySelectorAll('#results-div > *')
-    for (let e of elements) {e.remove()}
-    return
-}
 
-function remove_room() {
-    room_del = document.querySelectorAll('#room-div > *')
-    for (r of room_del) {r.remove()}
-}
-
-function remove_reservations() {
-    res_del = document.querySelectorAll('#my_reservations-div > *')
-    for (r of res_del) {r.remove()}
-}
-
-function remove_res() {
-    res_del = document.querySelectorAll('#select_res-div > *')
-    for (r of res_del) {r.remove()}
+const remove_elements = (selectors) => {
+    let divsToClear = document.querySelectorAll(selectors)
+    for (let element of divsToClear) {element.remove()}
 }
 
 
 async function query_db() {
-    remove_results()
-    remove_room()
+    remove_elements("#results-div > *, #room-div > *")
     let title = document.createElement('h2')
     title.classList.add('display-6', 'my-3')
     title.innerHTML = 'Available Rooms:'
@@ -123,10 +107,7 @@ function search() {
     document.querySelectorAll('#results-div, #rooms-div, #my_reservations-div, #room-div, #select_res-div').forEach(div => {
         div.style.display = 'none'
     })
-    remove_results()
-    remove_room()
-    remove_reservations()
-    remove_res()
+    remove_elements("#results-div > *, #room-div > *, #my_reservations-div > *, #select_res-div > *")
 }
 
 async function results() {
@@ -149,7 +130,7 @@ async function select_room(room) {
         div.style.display = 'none'
     })
     document.querySelector('#room-div').style.display = 'block'
-    remove_results()
+    remove_elements("#results-div > *")
     let title = document.createElement('h2')
     title.classList.add('display-6', 'my-3')
     title.innerHTML = 'Your Selection'
@@ -197,10 +178,7 @@ async function rooms() {
     document.querySelector('#rooms-div').style.display = 'block'
     document.querySelectorAll('#search-div, #results-div, #my_reservations-div, #room-div, #select_res-div').forEach(div => {
         div.style.display = 'none'
-        remove_room()
-        remove_results()
-        remove_reservations()
-        remove_res()
+        remove_elements("#results-div > *, #room-div > *, #my_reservations-div > *, #select_res-div > *")
     })
 }
 
@@ -212,10 +190,7 @@ async function my_reservations() {
     document.querySelectorAll('#search-div, #results-div, #rooms-div, #room-div, #select_res-div').forEach(div => {
         div.style.display = 'none'
     })
-    remove_room()
-    remove_results()
-    remove_reservations()
-    remove_res()
+    remove_elements("#results-div > *, #room-div > *, #my_reservations-div > *, #select_res-div > *")
     await fetch('my_reservations')
     .then(response => response.json())
     .then(reservations => {
@@ -248,7 +223,7 @@ async function select_res(res) {
         div.style.display = 'none'
     })
     document.querySelector('#select_res-div').style.display = 'block'
-    remove_reservations()
+    remove_elements("#my_reservations-div > *")
     await fetch('my_reservations/' + res.id)
     .then(response => response.json())
     .then(res => {
