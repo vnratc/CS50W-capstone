@@ -1,3 +1,20 @@
+const changeDateClick = async (btn) => {
+    if (!document.querySelector('#checkout').value &&
+        !document.querySelector('#checkin').value && 
+        !document.querySelector('#pers_num').value)
+        {return}
+    let chin = document.querySelector('#checkin').value
+    let chout = document.querySelector('#checkout').value
+    await fetch(`change_date?btn=${btn.id}&chin=${chin}&chout=${chout}`)
+    .then(response => response.json())
+    .then(data => {
+        if (btn.id.slice(0, 4) === 'chin') {document.querySelector('#checkin').value = data['new_date']}
+        else if (btn.id.slice(0, 5) === 'chout') {document.querySelector('#checkout').value = data['new_date']}
+    })   
+    search()
+}
+
+
 document.addEventListener('DOMContentLoaded', function () {
     // Navigation
     document.querySelector('#search').addEventListener('click', () => {
@@ -17,21 +34,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Change dates with buttons and remove results if clicked
     document.querySelectorAll('.change-date').forEach(btn => {
-        btn.onclick = async function() {
-            if (document.querySelector('#checkout').value &&
-            document.querySelector('#checkin').value && 
-            document.querySelector('#pers_num').value) {
-                let chin = document.querySelector('#checkin').value
-                let chout = document.querySelector('#checkout').value
-                await fetch(`change_date?btn=${btn.id}&chin=${chin}&chout=${chout}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (btn.id.slice(0, 4) === 'chin') {document.querySelector('#checkin').value = data['new_date']}
-                    else if (btn.id.slice(0, 5) === 'chout') {document.querySelector('#checkout').value = data['new_date']}
-                })   
-                search()
-            }
-        }
+        btn.addEventListener("click", () => {
+            changeDateClick(btn)
+        })
     })
     // Reset search on change in form
     document.querySelectorAll('input, select').forEach(input => {
@@ -39,7 +44,8 @@ document.addEventListener('DOMContentLoaded', function () {
     })
 
     // Search available dates for a selected room
-    document.querySelectorAll('.search-title').forEach(btn => {
+    const roomsToSelect = document.querySelectorAll('.search-title')
+    roomsToSelect.forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelector('#req_room').value = btn.id.slice(-1)    // This -1 is going to be a problem if number of rooms is greater than 9
             search()
@@ -50,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function () {
 // Helper functions
 
 function create_room_div(room) {
-    console.log(room.img)
     let room_div = document.createElement('div')
     room_div.classList.add('room-item','rounded', 'border', 'border-secondary', 'my-5', 'border-opacity-25')
     total = (room.price * room.duration).toFixed(2)
@@ -89,12 +94,14 @@ async function query_db() {
     await fetch(`search?chin=${chin}&chout=${chout}&pers_num=${pers_num}&req_room=${req_room}`)
     .then(response => response.json())
     .then(rooms => {
+        console.log(rooms)
         if (rooms.length > 0) {
             for (r of rooms) {
                 let room_div = create_room_div(r)
                 document.querySelector('#results-div').append(room_div)
             }
-        } else {title.innerHTML = 'No Rooms Available with Selected Parameters'}
+        }
+        else {title.innerHTML = 'No Rooms Available with Selected Parameters'}
     })
     console.log('Results Updated')
 }
