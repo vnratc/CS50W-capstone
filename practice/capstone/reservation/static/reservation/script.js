@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Search available dates for a selected room
     document.querySelectorAll('.search-title').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelector('#req_room').value = btn.id.slice(-1)
+            document.querySelector('#req_room').value = btn.id.slice(-1)    // This -1 is going to be a problem if number of rooms is greater than 9
             search()
         } )
     })
@@ -224,6 +224,7 @@ async function my_reservations() {
         title.classList.add('display-6', 'my-3')
         document.querySelector('#my_reservations-div').prepend(title)
         for (res of reservations) {
+
             let res_div = document.createElement('div')
             res_div.classList.add('res-item','rounded', 'border', 'border-secondary', 'my-5', 'border-opacity-25')
             res_div.innerHTML = `<img class="img-fluid rounded-top" src="media/${res.room_img}"><br>
@@ -255,7 +256,8 @@ async function select_res(res) {
         let sel_res_div = document.createElement('div')
         sel_res_div.classList.add('sel-res-item','rounded', 'border', 'border-secondary', 'my-3', 'border-opacity-25')
         sel_res_div.innerHTML = `<img class="img-fluid rounded-top" src="media/${res.room_img}"><br>
-        <h5 class="card-title mt-4">${res.room_title}</h5>Beds: ${res.room_bed_num}<br>
+        <h5 class="card-title mt-4">${res.room_title}</h5>
+        Beds: ${res.room_bed_num}<br>
         ${res.checkin} - ${res.checkout}<br>
         <strong>\$${res.total}</strong> for ${res.duration} nights<br>
         <p class='p-4'>${res.room_description.replaceAll('\n', '<br>')}</p>`
