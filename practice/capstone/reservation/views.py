@@ -12,6 +12,7 @@ from .models import User, Reservation, Room
 from .forms import SearchForm
 
 
+# Render home page.
 def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
@@ -21,38 +22,50 @@ def index(request):
         'all_rooms': all_rooms
     })
 
+
+# React to clicking "change date" buttons left and right of the date picker.
 def change_date(request):
     if not request.GET:
         print(f'{request.GET} is empty, redirecting to index')
         return HttpResponseRedirect(reverse("index"))
+    
+    # Store what button was clicked and also checkin and checkout dates from the form.
     btn = request.GET['btn']
     form_chin = datetime.strptime(request.GET['chin'], '%Y-%m-%d').date()
     form_chout = datetime.strptime(request.GET['chout'], '%Y-%m-%d').date()
+
+    # Define day, today, tomorrow and duration.
     duration = (form_chout - form_chin).days
-    day = timedelta(days=1)
     today = datetime.now().date()
     day = timedelta(days=1)
     tomorow = (datetime.now().date() + day)
+
+    # new_date calculation logic.
     if btn == 'chin-' and form_chin > today: new_date = (form_chin - day).strftime('%Y-%m-%d')
     elif btn == 'chin-': new_date = today.strftime('%Y-%m-%d')
     elif btn == 'chin': new_date = (form_chin + day).strftime('%Y-%m-%d')
     elif btn == 'chout-' and form_chout > tomorow: new_date = (form_chout - day).strftime('%Y-%m-%d')
     elif btn == 'chout-': new_date = tomorow.strftime('%Y-%m-%d')
     elif btn == 'chout': new_date = (form_chout + day).strftime('%Y-%m-%d')
+
+    # Send back new_date and duration in a JSON.
     return JsonResponse({'new_date': new_date, 'duration': duration}, safe=False)
 
 
+# Search rooms based on the form data.
 @csrf_exempt
 def search(request):
     if not request.GET:
         print(f'{request.GET} is empty, redirecting to index')
         return HttpResponseRedirect(reverse("index"))
+    
     # Extract and check data from search form
     if not request.GET['chin']: return JsonResponse({'message': 'Select Checkin date.'})
     else: req_chin = datetime.strptime(request.GET['chin'], '%Y-%m-%d').date()
     if req_chin < datetime.now().date(): return JsonResponse({'message': 'Checkin can not be in the past'})
     if not request.GET['chout']: return JsonResponse({'message': 'Select Checkout date.'})
     else: req_chout = datetime.strptime(request.GET['chout'], '%Y-%m-%d').date()
+
     # Get duration
     duration = (req_chout - req_chin).days
     if not request.GET['pers_num']: return JsonResponse({'message': 'Enter number of guests.'})
@@ -61,7 +74,8 @@ def search(request):
     if req_room: req_room = int(request.GET['req_room'])
     if req_chin >= req_chout:
         return JsonResponse({'message': 'Invalid Checkin/Checkout dates.'})
-    # Query and filter db
+    
+    # Query db and filter out not suitable for the request rooms.
     if req_room:
         rooms = Room.objects.filter(pk=req_room).exclude(bed_num__lt=pers_num)
     else:
@@ -73,6 +87,7 @@ def search(request):
     if conflicting_res:
         rooms = rooms.exclude(reservation__in=conflicting_res)
 
+    # Add duration to the list of selected rooms.
     rooms_list = []
     for room in rooms:
         room = room.serialize()
@@ -81,11 +96,11 @@ def search(request):
     return JsonResponse(rooms_list, safe=False)
 
 
+# Render a selected room page based on the form data.
 def room(request, room_id):
     if not request.GET:
         print(f'{request.GET} is empty, redirecting to index')
         return HttpResponseRedirect(reverse("index"))
-    print(request.GET)
     room = Room.objects.get(pk=room_id)
     req_chin = datetime.strptime(request.GET['chin'], '%Y-%m-%d').date() 
     req_chout = datetime.strptime(request.GET['chout'], '%Y-%m-%d').date()
