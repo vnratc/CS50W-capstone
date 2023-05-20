@@ -1,15 +1,21 @@
 document.addEventListener('DOMContentLoaded', function () {
     
-    // Navigation.
+    // Show the search form.
     document.querySelector('#search').addEventListener('click', () => {
         search()
     })
+
+    // Show the search results.
     document.querySelector('#search-btn').addEventListener('click', () => {
         results()
     })
+
+    // Show all the rooms in this hotel.
     document.querySelector('#rooms').addEventListener('click', () => {
         rooms()
     })
+
+    // Show user's reservations.
     document.querySelector('#my_reservations').addEventListener('click', () => {
         my_reservations()
     })
@@ -93,7 +99,7 @@ function create_room_div(room) {
 }
 
 
-// Utility function to hide unwanted views (to remove unwanted divs).
+// Utility function to hide unwanted views (to remove unwanted divs and elements inside them).
 const remove_elements = (selectors) => {
     let divsToClear = document.querySelectorAll(selectors)
     for (let element of divsToClear) {element.remove()}
